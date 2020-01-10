@@ -19,9 +19,9 @@ MODEL_PATH = os.path.join(settings.BASE_DIR, 'classifier/ml/malaria.h5')
 classes = ['Parasitized', 'Uninfected']
 
 # Load your trained model
-# malaria_model = keras.models.load_model(MODEL_PATH)
+malaria_model = keras.models.load_model(MODEL_PATH)
 print(MODEL_PATH)
-# malaria_model._make_predict_function()
+malaria_model._make_predict_function()
 
 
 def model_predict(img_path):
@@ -39,8 +39,8 @@ def model_predict(img_path):
     # otherwise, it won't make correct prediction!
     # x = preprocess_input(x, mode='caffe')
 
-    # preds = malaria_model.predict(img)
-    preds = 1
+    preds = malaria_model.predict(img)
+    # preds = 1
     print(preds)
     return preds
 
