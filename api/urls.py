@@ -6,5 +6,7 @@ from .views import *
 urlpatterns = [
     path('register', register, name='register'),
     path('login', login, name='login'),
-    path('me', my_profile, name='my_profile')
+    path('me', my_profile, name='my_profile'),
+    path('patients', get_patients, name='patient_data'),
+    path('add-patient-data', add_patient_data, name='add_patient_data')
 ]
