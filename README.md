@@ -90,3 +90,35 @@ header
   "userType": 3
 }
 ```
+
+
+### 4. Get All Patient
+#### Request
+```
+GET /api/patients
+
+header
+{
+    "Authorization": "d2c7ee899087a75f71448dcb93ffee571387b16e"
+}
+```
+#### Response
+```
+{
+  "status": 1,
+  "patientData": [
+    {
+      "id": 3,
+      "username": "patient1",
+      "fullName": "nakano miku",
+      "userType": 3
+    },
+    {
+      "id": 5,
+      "username": "patient3",
+      "fullName": "Nakano Ichika",
+      "userType": 3
+    }
+  ]
+}
+```
