@@ -11,6 +11,7 @@ from rest_framework.status import (
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializers import *
+from .models import *
 
 
 @csrf_exempt
@@ -90,4 +91,78 @@ def my_profile(request):
         'fullName': full_name,
         'userType': user_type
     }, status=HTTP_200_OK)
+
+
+# Get patient list
+@csrf_exempt
+@api_view(["GET"])
+# @permission_classes((AllowAny,))
+def get_patients(request):
+    # get current user
+    user = request.user
+    if user:
+        # check if user is medstaff
+        if user.profile.user_type == 2:
+            # get all patient from user profile table
+            queryset = UserProfile.objects.filter(user_type=3)
+            patients = []
+
+            # arrange patient data
+            for patient in queryset:
+                username = patient.user.username
+                user_type = patient.user_type
+                full_name = patient.user.first_name + ' ' + patient.user.last_name
+                patient_data = {
+                    'id': patient.user.id,
+                    'username': username,
+                    'fullName': full_name,
+                    'userType': user_type
+                }
+                patients.append(patient_data)
+
+            return Response({
+                'status': 1,
+                'patientData': patients
+            })
+        else:
+            # if user is not medstaff
+            return Response({
+                'status': 0,
+                'message': 'access denied'
+            })
+
+
+# submit patient data
+@csrf_exempt
+@api_view(["POST"])
+# @permission_classes((AllowAny,))
+def add_patient_data(request):
+    # get current user
+    user = request.user
+    if user:
+        # check if user is medstaff
+        if user.profile.user_type == 2:
+            patient_id = request.data.get('patientId')
+            patient = UserProfile.objects.get(patient_number=patient_id)
+            if patient:
+                patient_data = PatientData(
+                    patient=patient,
+                    patient_name=patient.user.first_name + ' ' + patient.user.last_name,
+                    patient_number=patient_id,
+                    medical_personnel=user.profile,
+                    assigned_doctor=user.profile,  # temp fix
+                    input_place=request.data.get('inputPlace'),
+                    image=request.data.get('imageUrl'),
+                    result=-1,  # temp fix
+                    status='unconfirmed'
+                )
+
+                patient_data.save()
+
+                return Response({
+                    'status': 1
+                })
+
+
+
 
