@@ -7,12 +7,14 @@ from django.dispatch import receiver
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    full_name = models.TextField(null=True)
     user_type = models.IntegerField(null=True)  # 1=Dokter, 2=Tenaga Medis, 3=Pasien
     patient_number = models.IntegerField(null=True)
 
     def save(self, *args, **kwargs):
         if self.user_type == 3:
             self.patient_number = self.user.id
+        self.full_name = self.user.first_name + ' ' + self.user.last_name
 
         super(UserProfile, self).save(*args, **kwargs)
 
@@ -47,7 +49,7 @@ class PatientData(models.Model):
     status = models.TextField(null=True)
 
     def save(self, *args, **kwargs):
-        self.patient_name = self.patient.user.first_name + ' ' + self.patient.user.last_name
+        self.patient_name = self.patient.full_name
         self.patient_number = self.patient.user.id
 
         super(PatientData, self).save(*args, **kwargs)
