@@ -13,3 +13,10 @@ class PatientDataSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = PatientData
         fields = ('input_place', 'image')
+
+
+class PatientDataWriteSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = PatientData
+        fields = '__all__'
+

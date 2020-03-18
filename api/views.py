@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from .serializers import *
 from .models import *
+from .utils import *
 
 
 @csrf_exempt
@@ -164,5 +165,89 @@ def add_patient_data(request):
                 })
 
 
+@csrf_exempt
+@api_view(["POST", "GET"])
+def patient_data(request):
+    user = request.user
+
+    # If user is medstaff
+    if user.profile.user_type == 2:
+        # If medstaff is add new data
+        if request.method == "POST":
+            patient_id = request.data.get('patientId')
+            patient = UserProfile.objects.get(patient_number=patient_id)
+            # If assigned patient is valid
+            if patient:
+                # Get doctor
+                doctor_id = get_doctor()
+                print(doctor_id)
+                queryset = User.objects.get(id=doctor_id)
+                doctor = queryset.profile
+                patient_data = PatientData(
+                    patient=patient,
+                    patient_name=patient.user.first_name + ' ' + patient.user.last_name,
+                    patient_number=patient_id,
+                    medical_personnel=user.profile,
+                    assigned_doctor=doctor,  # temp fix
+                    input_place=request.data.get('inputPlace'),
+                    image=request.data.get('imageUrl'),
+                    result=-1,  # temp fix
+                    status='unconfirmed'
+                )
+
+                patient_data.save()
+
+                return Response({
+                    'status': 1
+                })
+            else:
+                return Response({
+                    'status': 0
+                })
+        # If medstaff request data
+        elif request.method == "GET":
+            queryset = PatientData.objects.all()
+
+            serializer = PatientDataWriteSerializer(queryset, many=True)
+            return Response({
+                'status': 1,
+                'data': serializer.data
+            })
+    # If user is doctor and he/she is requesting data
+    elif user.profile.user_type == 1 and request.method == 'GET':
+        queryset = PatientData.objects.filter(assigned_doctor=user.profile)
+
+        serializer = PatientDataWriteSerializer(queryset, many=True)
+        return Response({
+            'status': 1,
+            'data': serializer.data
+        })
+
+
+@csrf_exempt
+@api_view(["POST"])
+def confirm_case(request):
+    user = request.user
+
+    # If user is doctor
+    if user.profile.user_type == 1:
+        patient_data_id = request.data.get('id')
+        result = request.data.get('result')
+
+        try:
+            patient_data = PatientData.objects.get(id=patient_data_id)
+            patient_data.result = result
+            patient_data.status = 'confirmed'
+            patient_data.save()
+
+            serializer = PatientDataWriteSerializer(patient_data)
+            return Response({
+                'status': 1,
+                'data': serializer.data
+            })
+        except:
+            return Response({
+                'status': 0,
+            })
 
 

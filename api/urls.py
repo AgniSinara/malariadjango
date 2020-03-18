@@ -8,5 +8,7 @@ urlpatterns = [
     path('login', login, name='login'),
     path('me', my_profile, name='my_profile'),
     path('patients', get_patients, name='patient_data'),
-    path('add-patient-data', add_patient_data, name='add_patient_data')
+    path('add-patient-data', add_patient_data, name='add_patient_data'),
+    path('patient-data', patient_data, name='patient_data'),
+    path('confirm-case', confirm_case, name='confirm_case')
 ]
