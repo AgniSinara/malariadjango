@@ -231,7 +231,7 @@ def confirm_case(request):
 
     # If user is doctor
     if user.profile.user_type == 1:
-        patient_data_id = request.data.get('id')
+        patient_data_id = request.data.get('patientDataId')
         result = request.data.get('result')
 
         try:
