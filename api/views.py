@@ -223,6 +223,16 @@ def patient_data(request):
             'data': serializer.data
         })
 
+    elif user.profile.user_type == 3 and request.method == 'GET':
+        queryset = PatientData.objects.filter(patient=user.profile)
+
+        serializer = PatientDataWriteSerializer(queryset, many=True)
+        return Response({
+            'status': 1,
+            'data': serializer.data
+        })
+
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -231,23 +241,64 @@ def confirm_case(request):
 
     # If user is doctor
     if user.profile.user_type == 1:
-        patient_data_id = request.data.get('id')
+        patient_data_id = request.data.get('patientDataId')
         result = request.data.get('result')
 
         try:
             patient_data = PatientData.objects.get(id=patient_data_id)
-            patient_data.result = result
-            patient_data.status = 'confirmed'
-            patient_data.save()
 
-            serializer = PatientDataWriteSerializer(patient_data)
-            return Response({
-                'status': 1,
-                'data': serializer.data
-            })
+            if patient_data.assigned_doctor == user.profile:
+                patient_data.result = result
+                patient_data.status = 'confirmed'
+                patient_data.save()
+
+                serializer = PatientDataWriteSerializer(patient_data)
+                return Response({
+                    'status': 1,
+                    'data': serializer.data
+                })
+            else:
+                return Response({
+                    'status': 0,
+                    'message': 'koe sopo?'
+                })
+
         except:
             return Response({
                 'status': 0,
             })
 
+    else:
+        return Response({
+            'status': 0,
+            'message': 'koe sopo?'
+        })
+
+
+
+
+@csrf_exempt
+@api_view(["GET"])
+def patient_data_detail(request, id):
+    user_type = request.user.profile.user_type
+
+    try:
+        patient_data = PatientData.objects.get(id=id)
+
+        if (user_type == 1 and patient_data.assigned_doctor == request.user.profile) or user_type == 2 or (
+                request.user.profile == patient_data.patient):
+            serializer = PatientDataWriteSerializer(patient_data)
+            return Response({
+                'status': 1,
+                'data': serializer.data
+            })
+        else:
+            return Response({
+                'status': 0,
+                'message': 'koe sopo? '
+            })
+    except:
+        return Response({
+            'status': 0,
+        })
 
