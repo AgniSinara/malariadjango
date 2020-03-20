@@ -295,7 +295,7 @@ def patient_data_detail(request, id):
         else:
             return Response({
                 'status': 0,
-                'message': 'koe sopo? '
+                'message': 'koe sopo?'
             })
     except:
         return Response({
