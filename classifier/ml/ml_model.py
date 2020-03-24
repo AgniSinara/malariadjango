@@ -14,13 +14,13 @@ import tensorflow.keras as keras
 
 
 
-# MODEL_PATH = os.path.join(settings.BASE_DIR, 'classifier/ml/malaria.h5')
-# classes = ['Parasitized', 'Uninfected']
-#
-# # Load your trained model
-# malaria_model = keras.models.load_model(MODEL_PATH)
-# print(MODEL_PATH)
-# malaria_model._make_predict_function()
+MODEL_PATH = os.path.join(settings.BASE_DIR, 'classifier/ml/malaria.h5')
+classes = ['Parasitized', 'Uninfected']
+
+# Load your trained model
+malaria_model = keras.models.load_model(MODEL_PATH)
+print(MODEL_PATH)
+malaria_model._make_predict_function()
 #
 #
 # def model_predict(img_path):
@@ -53,7 +53,9 @@ def model_predict(img_url):
         img = plt.imread(img_raw)
         img = resize(img, (64, 64, 3))
         img = img[np.newaxis, :]
-        # preds = malaria_model.predict(img)
+        preds = malaria_model.predict(img)
+
+        return preds
 
 
 

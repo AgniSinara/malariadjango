@@ -185,6 +185,14 @@ def patient_data(request):
                 print(doctor_id)
                 queryset = User.objects.get(id=doctor_id)
                 doctor = queryset.profile
+
+
+                url = request.data.get('imageUrl')
+                hasil = model_predict(url)
+                classes = [1, 0]
+                result = str('{}'.format(classes[np.argmax(hasil[0])]))
+
+
                 patient_data = PatientData(
                     patient=patient,
                     patient_name=patient.user.first_name + ' ' + patient.user.last_name,
@@ -192,8 +200,8 @@ def patient_data(request):
                     medical_personnel=user.profile,
                     assigned_doctor=doctor,  # temp fix
                     input_place=request.data.get('inputPlace'),
-                    image=request.data.get('imageUrl'),
-                    result=-1,  # temp fix
+                    image=url,
+                    result=int(result),  # temp fix
                     status='unconfirmed'
                 )
 
@@ -310,4 +318,12 @@ def patient_data_detail(request, id):
 def img_test(request):
     url = request.data.get('url')
 
-    model_predict(url)
+    hasil = model_predict(url)
+    classes = [1, 0]
+    result = str('{}'.format(classes[np.argmax(hasil[0])]))
+
+    return Response({
+        'status': 0,
+        'hasil': int(result)
+    })
+
