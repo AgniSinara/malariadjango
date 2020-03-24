@@ -47,10 +47,12 @@ class PatientData(models.Model):
     image = models.TextField(null=True)
     result = models.IntegerField(null=True)
     status = models.TextField(null=True)
+    doctor_name = models.TextField(null=True)
 
     def save(self, *args, **kwargs):
         self.patient_name = self.patient.full_name
         self.patient_number = self.patient.user.id
+        self.doctor_name = self.assigned_doctor.full_name
 
         super(PatientData, self).save(*args, **kwargs)
 

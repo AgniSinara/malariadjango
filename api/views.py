@@ -14,6 +14,8 @@ from .serializers import *
 from .models import *
 from .utils import *
 
+from classifier.ml.ml_model import *
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -302,3 +304,10 @@ def patient_data_detail(request, id):
             'status': 0,
         })
 
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def img_test(request):
+    url = request.data.get('url')
+
+    model_predict(url)
