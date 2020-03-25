@@ -48,11 +48,13 @@ class PatientData(models.Model):
     result = models.IntegerField(null=True)
     status = models.TextField(null=True)
     doctor_name = models.TextField(null=True)
+    medical_personnel_name = models.TextField(null=True)
 
     def save(self, *args, **kwargs):
         self.patient_name = self.patient.full_name
         self.patient_number = self.patient.user.id
         self.doctor_name = self.assigned_doctor.full_name
+        self.medical_personnel_name = self.medical_personnel.full_name
 
         super(PatientData, self).save(*args, **kwargs)
 
