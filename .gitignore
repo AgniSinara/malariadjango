@@ -1,6 +1,0 @@
-env
-.idea
-classifier/migrations/*
-api/migrations/*
-__pycache__/
-db.sqlite3
