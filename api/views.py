@@ -246,7 +246,7 @@ def patient_data(request):
 
 @csrf_exempt
 @api_view(["POST"])
-def confirm_case(request):
+def change_result(request):
     user = request.user
 
     # If user is doctor
@@ -259,7 +259,46 @@ def confirm_case(request):
 
             if patient_data.assigned_doctor == user.profile:
                 patient_data.result = result
-                patient_data.status = 'confirmed'
+                # patient_data.status = 'confirmed'
+                patient_data.save()
+
+                serializer = PatientDataWriteSerializer(patient_data)
+                return Response({
+                    'status': 1,
+                    'data': serializer.data
+                })
+            else:
+                return Response({
+                    'status': 0,
+                    'message': 'koe sopo?'
+                })
+
+        except:
+            return Response({
+                'status': 0,
+            })
+
+    else:
+        return Response({
+            'status': 0,
+            'message': 'koe sopo?'
+        })
+
+
+@csrf_exempt
+@api_view(["POST"])
+def confirm_case(request):
+    user = request.user
+
+    # If user is doctor
+    if user.profile.user_type == 1:
+        patient_data_id = request.data.get('patientDataId')
+        status = request.data.get('status')
+        try:
+            patient_data = PatientData.objects.get(id=patient_data_id)
+
+            if patient_data.assigned_doctor == user.profile:
+                patient_data.status = status
                 patient_data.save()
 
                 serializer = PatientDataWriteSerializer(patient_data)
