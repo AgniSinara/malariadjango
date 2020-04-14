@@ -12,5 +12,6 @@ urlpatterns = [
     path('patient-data', patient_data, name='patient_data'),
     path('patient-data/<int:id>', patient_data_detail, name='patient_data_detail'),
     path('confirm-case', confirm_case, name='confirm_case'),
+    path('change-result', change_result, name='change_result'),
     path('test-dl', img_test, name='ss')
 ]
