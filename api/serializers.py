@@ -20,3 +20,8 @@ class PatientDataWriteSerializer(serializers.ModelSerializer):
         model = PatientData
         fields = '__all__'
 
+class HospitalDataSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = HospitalData
+        fields = '__all__'
+

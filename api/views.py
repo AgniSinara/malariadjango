@@ -38,12 +38,13 @@ def login(request):
         3: 'Pasien'
     }
     full_name = user.first_name + ' ' + user.last_name
-
+    
     return Response({
         'token': token.key,
         'userId': user.pk,
         'username': user.username,
         'fullName': full_name,
+        'current_hospital': user.profile.current_hospital.hospital_name,
         'userType': user_type[user.profile.user_type]
     }, status=HTTP_200_OK)
 
@@ -58,25 +59,54 @@ def register(request):
     last_name = request.data.get('lastName')
     user_type = request.data.get('userType')
 
-    user_serializers = UserSerializer(data=request.data)
-    if user_serializers.is_valid() and user_type in [1, 2, 3]:
-        user = User.objects.create_user(username=username,
-                                        password=password,
-                                        first_name=first_name,
-                                        last_name=last_name)
-
-        user.profile.user_type = user_type
-        user.save()
-
+    # user_serializers = UserSerializer(data=request.data)
+    if User.objects.filter(username=username).exists():
         return Response({
-            'status': 1,
-            'message': 'User successfully created'
-        })
+                'status': 0,
+                'message': 'Akun sudah ada'
+            }, status=HTTP_400_BAD_REQUEST)
+    
     else:
-        return Response({
-            'status': 0,
-            'message': 'Please provide all required data'
-        }, status=HTTP_400_BAD_REQUEST)
+
+        if user_type in [1, 2, 3]:
+
+            if user_type == 1 or user_type == 2:      
+                current_hospitalID = request.data.get('currentHospitalID')
+                current_hospital = HospitalData.objects.get(id=current_hospitalID)
+
+                user = User.objects.create_user(username=username,
+                                                password=password,
+                                                first_name=first_name,
+                                                last_name=last_name,)
+                
+            else:
+                current_hospitalID = int(username.split('-')[0])
+
+                if HospitalData.objects.filter(id=current_hospitalID).exists():  
+                    current_hospital = HospitalData.objects.get(id=current_hospitalID)
+                    user = User.objects.create_user(username=username,
+                                                    password=password,
+                                                    first_name=first_name,
+                                                    last_name=last_name)
+                else:
+                    return Response({
+                        'status': 0,
+                        'message': 'Mohon cek kembali kode rumah sakit'
+                    }, status=HTTP_400_BAD_REQUEST)
+            
+            user.profile.current_hospital = current_hospital
+            user.profile.user_type = user_type
+            user.save()
+
+            return Response({
+                'status': 1,
+                'message': 'User successfully created'
+            })
+        else:
+            return Response({
+                'status': 0,
+                'message': 'Please provide all required data'
+            }, status=HTTP_400_BAD_REQUEST)
 
 
 
@@ -177,11 +207,13 @@ def patient_data(request):
         # If medstaff is add new data
         if request.method == "POST":
             patient_id = request.data.get('patientId')
+            current_hospital_id = request.data.get('current_hospital')
             patient = UserProfile.objects.get(patient_number=patient_id)
+            current_hospital = HospitalData.objects.get(id=current_hospital_id)
             # If assigned patient is valid
             if patient:
                 # Get doctor
-                doctor_id = get_doctor()
+                doctor_id = get_doctor(current_hospital)
                 print(doctor_id)
                 queryset = User.objects.get(id=doctor_id)
                 doctor = queryset.profile
@@ -199,7 +231,7 @@ def patient_data(request):
                     patient_number=patient_id,
                     medical_personnel=user.profile,
                     assigned_doctor=doctor,  # temp fix
-                    input_place=request.data.get('inputPlace'),
+                    input_place=current_hospital.hospital_name,
                     image=url,
                     result=int(result),  # temp fix
                     status='unconfirmed'
@@ -365,4 +397,24 @@ def img_test(request):
         'status': 0,
         'hasil': int(result)
     })
+
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes((AllowAny,))
+def hospital_data(request):
+    user = request.user
+    userType = user.profile.user_type
+    hospital_data = HospitalData.objects.all()
+
+    if (userType):
+        serializer = HospitalDataSerializer(hospital_data, many=True)
+        return Response({
+            'status': 1,
+            'data': serializer.data
+        })
+    else:
+        return Response({
+            'status': 0,
+            'message': 'koe sopo? '
+        })
 

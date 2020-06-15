@@ -5,9 +5,21 @@ from django.dispatch import receiver
 
 
 # Create your models here.
+class HospitalData(models.Model):
+    hospital_name = models.TextField()
+    hospital_address = models.TextField()
+
+class RegisterData(models.Model):
+    registration_number = models.TextField(null=True)
+    hospital_name = models.ForeignKey(HospitalData, on_delete=models.SET_NULL,
+                                    related_name="current_hospital_RegisterData", null=True)
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     full_name = models.TextField(null=True)
+    registration_number = models.TextField(null=True)
+    current_hospital = models.ForeignKey(HospitalData, on_delete=models.SET_NULL,
+                                        related_name="current_hospital_UserProfile", null=True)
     user_type = models.IntegerField(null=True)  # 1=Dokter, 2=Tenaga Medis, 3=Pasien
     patient_number = models.IntegerField(null=True)
 
@@ -57,5 +69,3 @@ class PatientData(models.Model):
         self.medical_personnel_name = self.medical_personnel.full_name
 
         super(PatientData, self).save(*args, **kwargs)
-
-

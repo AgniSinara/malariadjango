@@ -3,6 +3,7 @@ from .models import *
 
 # Register your models here.
 admin.site.register(UserProfile)
+admin.site.register(HospitalData)
 # admin.site.register(PatientData)
 
 # admin.site.register(UserProfile)
